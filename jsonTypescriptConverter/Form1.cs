@@ -106,6 +106,17 @@ namespace jsonTypescriptConverter
                 if (method.Owner != xb.Name) continue;
                 if (method.Private == true) continue;
 
+				if(method.Params != null)
+				{
+					sb.Append("  /**\n    *\n");
+					foreach(var p in method.Params)
+					{
+						sb.Append("    * @param{" + getTypeForParamComment(p.HtmlType) + "} " + getName(p.Name));
+						sb.Append(p.Doc);
+						sb.Append("\n");
+					}
+					sb.Append("  */\n");
+				}
                 sb.Append("   " + method.Name + "(");
                 if (method.Params != null)
                 {
@@ -154,6 +165,22 @@ namespace jsonTypescriptConverter
 
             return p.Replace(".", "_");
         }
+
+		private string getTypeForParamComment(string p)
+		{
+			if(p == "undefined") return "void";
+
+			//String/String[] or String[]/Object
+			if(p.Contains("/"))
+			{
+				return p.Replace('/', '|');
+			}
+
+			//Object...  becomes Object[] etc?
+			if(p.EndsWith("...")) return p.Replace("...", "[]").Replace(".", "_");
+
+			return p.Replace(".", "_");
+		}
     
 
         private void dump(XmlAttribute x) {
